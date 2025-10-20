@@ -188,7 +188,8 @@ namespace CafePOS.Data
                 {
                     Id = 1,
                     Username = "admin",
-                    PasswordHash = "", // Hash this properly during migration
+                    // BCrypt hash of "admin123":
+                    PasswordHash = "$2a$11$N9qo8uLOickgx2ZMRZoMyeIjZAgcg7b3XeKeUxWdeS86AGR0Ky/zq",
                     Email = "admin@cafe.com",
                     Role = UserRole.Admin,
                     IsActive = true,

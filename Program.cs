@@ -1,12 +1,16 @@
 using CafePOS.API.Hubs;
 using CafePOS.API.Services;
 using CafePOS.Data;
+using CafePOS.API.DTOs;
+using CafePOS.Core.Models;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.AspNetCore.Identity.Data;
 using System.Text;
 
-var builder = WebApplicationBuilder.CreateBuilder(args);
+
+var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container
 builder.Services.AddControllers();

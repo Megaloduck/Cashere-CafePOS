@@ -1,4 +1,10 @@
-﻿namespace CafePOS.API.DTOs
+﻿using System;
+using CafePOS.API.DTOs;
+using CafePOS.API.Services;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
+
+namespace CafePOS.API.DTOs
 {
     // Authentication DTOs
     public class LoginRequest

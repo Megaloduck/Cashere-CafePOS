@@ -67,6 +67,10 @@ builder.Services.AddScoped<IPaymentService, PaymentService>();
 builder.Services.AddScoped<IMenuService, MenuService>();
 builder.Services.AddScoped<IReportService, ReportService>();
 
+// Admin Services
+builder.Services.AddScoped<IAdminMenuService, AdminMenuService>();
+builder.Services.AddScoped<IAdminUserService, AdminUserService>();
+
 // SignalR for real-time updates
 builder.Services.AddSignalR();
 

@@ -152,6 +152,9 @@ namespace CafePOS.Data
 
         private void SeedData(ModelBuilder modelBuilder)
         {
+            // Use a fixed date for seed data
+            var seedDate = new DateTime(2024, 1, 1, 0, 0, 0, DateTimeKind.Utc);
+
             // Seed default tax settings (10% VAT)
             modelBuilder.Entity<TaxSettings>().HasData(
                 new TaxSettings
@@ -160,40 +163,43 @@ namespace CafePOS.Data
                     DefaultTaxRate = 0.10m,
                     TaxName = "PPN",
                     IsEnabled = true,
-                    UpdatedAt = DateTime.UtcNow
+                    UpdatedAt = seedDate  // ← Fixed date
                 }
             );
 
             // Seed menu categories
             modelBuilder.Entity<MenuCategory>().HasData(
-                new MenuCategory { Id = 1, Name = "Coffee", Description = "Hot & Cold Coffee", DisplayOrder = 1, IsActive = true, CreatedAt = DateTime.UtcNow },
-                new MenuCategory { Id = 2, Name = "Tea", Description = "Tea Beverages", DisplayOrder = 2, IsActive = true, CreatedAt = DateTime.UtcNow },
-                new MenuCategory { Id = 3, Name = "Pastry", Description = "Cakes & Pastries", DisplayOrder = 3, IsActive = true, CreatedAt = DateTime.UtcNow },
-                new MenuCategory { Id = 4, Name = "Sandwich", Description = "Bread & Sandwiches", DisplayOrder = 4, IsActive = true, CreatedAt = DateTime.UtcNow }
+                new MenuCategory { Id = 1, Name = "Coffee", Description = "Hot & Cold Coffee", DisplayOrder = 1, IsActive = true, CreatedAt = seedDate },
+                new MenuCategory { Id = 2, Name = "Tea", Description = "Tea Beverages", DisplayOrder = 2, IsActive = true, CreatedAt = seedDate },
+                new MenuCategory { Id = 3, Name = "Pastry", Description = "Cakes & Pastries", DisplayOrder = 3, IsActive = true, CreatedAt = seedDate },
+                new MenuCategory { Id = 4, Name = "Sandwich", Description = "Bread & Sandwiches", DisplayOrder = 4, IsActive = true, CreatedAt = seedDate }
             );
 
             // Seed menu items
             modelBuilder.Entity<MenuItem>().HasData(
-                new MenuItem { Id = 1, CategoryId = 1, Name = "Americano", Description = "Espresso with hot water", Price = 25000m, IsTaxable = true, IsActive = true, DisplayOrder = 1, CreatedAt = DateTime.UtcNow },
-                new MenuItem { Id = 2, CategoryId = 1, Name = "Cappuccino", Description = "Espresso with steamed milk", Price = 30000m, IsTaxable = true, IsActive = true, DisplayOrder = 2, CreatedAt = DateTime.UtcNow },
-                new MenuItem { Id = 3, CategoryId = 1, Name = "Latte", Description = "Espresso with lots of steamed milk", Price = 32000m, IsTaxable = true, IsActive = true, DisplayOrder = 3, CreatedAt = DateTime.UtcNow },
-                new MenuItem { Id = 4, CategoryId = 2, Name = "Green Tea", Description = "Fresh green tea", Price = 18000m, IsTaxable = true, IsActive = true, DisplayOrder = 1, CreatedAt = DateTime.UtcNow },
-                new MenuItem { Id = 5, CategoryId = 3, Name = "Croissant", Description = "Buttery croissant", Price = 22000m, IsTaxable = true, IsActive = true, DisplayOrder = 1, CreatedAt = DateTime.UtcNow },
-                new MenuItem { Id = 6, CategoryId = 4, Name = "Ham & Cheese Sandwich", Description = "Toasted sandwich with ham and cheese", Price = 35000m, IsTaxable = true, IsActive = true, DisplayOrder = 1, CreatedAt = DateTime.UtcNow }
+                new MenuItem { Id = 1, CategoryId = 1, Name = "Americano", Description = "Espresso with hot water", Price = 25000m, IsTaxable = true, IsActive = true, DisplayOrder = 1, CreatedAt = seedDate },
+                new MenuItem { Id = 2, CategoryId = 1, Name = "Cappuccino", Description = "Espresso with steamed milk", Price = 30000m, IsTaxable = true, IsActive = true, DisplayOrder = 2, CreatedAt = seedDate },
+                new MenuItem { Id = 3, CategoryId = 1, Name = "Latte", Description = "Espresso with lots of steamed milk", Price = 32000m, IsTaxable = true, IsActive = true, DisplayOrder = 3, CreatedAt = seedDate },
+                new MenuItem { Id = 4, CategoryId = 2, Name = "Green Tea", Description = "Fresh green tea", Price = 18000m, IsTaxable = true, IsActive = true, DisplayOrder = 1, CreatedAt = seedDate },
+                new MenuItem { Id = 5, CategoryId = 3, Name = "Croissant", Description = "Buttery croissant", Price = 22000m, IsTaxable = true, IsActive = true, DisplayOrder = 1, CreatedAt = seedDate },
+                new MenuItem { Id = 6, CategoryId = 4, Name = "Ham & Cheese Sandwich", Description = "Toasted sandwich with ham and cheese", Price = 35000m, IsTaxable = true, IsActive = true, DisplayOrder = 1, CreatedAt = seedDate }
             );
 
-            // Seed a default admin user (password: admin123 - hashed, you should generate this properly)
+            // Seed a default admin user with STATIC hashed password
+            // Password: admin123
+            // Pre-computed BCrypt hash (cost factor 11)
+            var staticPasswordHash = "$2a$11$43yHNcPQDYxmlw9vv2/QjO4l8fs8jt8dYqoEd9wDe6.N8peP7Ui2i";
+
             modelBuilder.Entity<User>().HasData(
                 new User
                 {
                     Id = 1,
                     Username = "admin",
-                    // BCrypt hash of "admin123":
-                    PasswordHash = "$2a$11$N9qo8uLOickgx2ZMRZoMyeIjZAgcg7b3XeKeUxWdeS86AGR0Ky/zq",
+                    PasswordHash = staticPasswordHash,  // ← Use PasswordHash, not Password
                     Email = "admin@cafe.com",
                     Role = UserRole.Admin,
                     IsActive = true,
-                    CreatedAt = DateTime.UtcNow
+                    CreatedAt = seedDate
                 }
             );
         }

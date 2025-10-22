@@ -12,6 +12,14 @@ using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
+
+// TEMPORARY - Generate BCrypt hash
+//var testPassword = "admin123";
+//var generatedHash = BCrypt.Net.BCrypt.HashPassword(testPassword, 11);
+//Console.WriteLine("===========================================");
+//Console.WriteLine($"Generated Hash: {generatedHash}");
+//Console.WriteLine("===========================================");
+
 // Add services to the container
 builder.Services.AddControllers();
 builder.Services.AddCors(options =>
@@ -69,11 +77,11 @@ builder.Services.AddSwaggerGen();
 var app = builder.Build();
 
 // Auto-apply migrations
-using (var scope = app.Services.CreateScope())
-{
-    var dbContext = scope.ServiceProvider.GetRequiredService<CafePOSContext>();
-    dbContext.Database.Migrate();
-}
+//using (var scope = app.Services.CreateScope())
+//{
+ //   var dbContext = scope.ServiceProvider.GetRequiredService<CafePOSContext>();
+    //dbContext.Database.Migrate();
+//}
 
 // Middleware
 if (app.Environment.IsDevelopment())

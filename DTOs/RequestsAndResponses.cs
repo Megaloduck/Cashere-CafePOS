@@ -53,6 +53,9 @@ namespace CafePOS.API.DTOs
 
     public class OrderItemDto
     {
+        public int MenuItemId { get; set; }     
+        public string Name { get; set; }
+        public decimal Price { get; set; }
         public int Id { get; set; }
         public string ItemName { get; set; }
         public int Quantity { get; set; }

@@ -1,6 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using CafePOS.Data;
-using CafePOS.Core.Models;
+using CafePOS.API.Models;
+using CafePOS.API.Data;
 using CafePOS.API.DTOs;
 
 namespace CafePOS.API.Services

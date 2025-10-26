@@ -40,5 +40,12 @@ namespace CafePOS.API.Controllers
                 return StatusCode(500, new { message = ex.Message });
             }
         }
+        [HttpGet("top-items")]
+        public async Task<IActionResult> GetTopSellingItems(DateTime startDate, DateTime endDate, int count = 10)
+        {
+            var items = await _reportService.GetTopSellingItemsAsync(startDate, endDate, count);
+            return Ok(items);
+        }
+
     }
 }

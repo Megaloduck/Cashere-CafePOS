@@ -1,9 +1,7 @@
-﻿// Data/CafePOSContext.cs - Entity Framework DbContext
+﻿using Microsoft.EntityFrameworkCore;
+using CafePOS.API.Models;
 
-using Microsoft.EntityFrameworkCore;
-using CafePOS.Core.Models;
-
-namespace CafePOS.Data
+namespace CafePOS.API.Data
 {
     public class CafePOSContext : DbContext
     {

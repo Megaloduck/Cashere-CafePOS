@@ -1,6 +1,6 @@
-﻿using CafePOS.Data;
+﻿using CafePOS.API.Models;
+using CafePOS.API.Data;
 using CafePOS.API.DTOs;
-using CafePOS.Core.Models;
 using Microsoft.AspNetCore.Identity.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;

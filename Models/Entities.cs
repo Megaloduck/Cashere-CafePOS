@@ -1,9 +1,9 @@
-﻿// Models/Entities for CafePOS Database
-
+﻿using CafePOS.API.Models;
+using CafePOS.API.Data;
 using System;
 using System.Collections.Generic;
 
-namespace CafePOS.Core.Models
+namespace CafePOS.API.Models
 {
     // User & Authentication
     public class User

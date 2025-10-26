@@ -1,5 +1,5 @@
-﻿using CafePOS.Core.Models;
-using CafePOS.Data;
+﻿using CafePOS.API.Models;
+using CafePOS.API.Data;
 using CafePOS.API.DTOs;
 using Microsoft.AspNetCore.Identity.Data;
 using Microsoft.EntityFrameworkCore;
@@ -15,6 +15,8 @@ namespace CafePOS.API.Services
     {
         Task<DailySummaryDto> GetDailySummaryAsync(DateTime date);
         Task UpdateDailySummaryAsync();
+        Task<IEnumerable<TopSellingItemDTOs>> GetTopSellingItemsAsync(DateTime startDate, DateTime endDate, int count = 10);
+
     }
 
     public class ReportService : IReportService
@@ -71,5 +73,38 @@ namespace CafePOS.API.Services
 
             await _context.SaveChangesAsync();
         }
+        public async Task<IEnumerable<TopSellingItemDTOs>> GetTopSellingItemsAsync(DateTime startDate, DateTime endDate, int count = 10)
+        {
+            var transactions = await _context.Transactions
+                .Where(t => t.TransactionDate >= startDate && t.TransactionDate <= endDate)
+                .Include(t => t.Order)
+                    .ThenInclude(o => o.OrderItems)
+                        .ThenInclude(oi => oi.MenuItem)
+                        .ThenInclude(m => m.Category)
+                .ToListAsync();
+
+            var topItems = transactions
+                .SelectMany(t => t.Order.OrderItems)
+                .GroupBy(oi => new
+                {
+                    ItemId = oi.MenuItem.Id,
+                    ItemName = oi.MenuItem.Name,
+                    CategoryName = oi.MenuItem.Category.Name
+                })
+                .Select(g => new TopSellingItemDTOs
+                {
+                    Name = g.Key.ItemName,
+                    Category = g.Key.CategoryName,
+                    QuantitySold = g.Sum(x => x.Quantity),
+                    Revenue = g.Sum(x => x.UnitPrice * x.Quantity)
+                })
+                .OrderByDescending(x => x.QuantitySold)
+                .Take(count)
+                .ToList();
+
+            return topItems;
+        }
+
+
     }
 }

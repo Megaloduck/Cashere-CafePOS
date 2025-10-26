@@ -1,8 +1,8 @@
 using CafePOS.API.Hubs;
 using CafePOS.API.Services;
-using CafePOS.Data;
 using CafePOS.API.DTOs;
-using CafePOS.Core.Models;
+using CafePOS.API.Models;
+using CafePOS.API.Data;
 using Microsoft.OpenApi.Models;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
@@ -66,6 +66,7 @@ builder.Services.AddScoped<IOrderService, OrderService>();
 builder.Services.AddScoped<IPaymentService, PaymentService>();
 builder.Services.AddScoped<IMenuService, MenuService>();
 builder.Services.AddScoped<IReportService, ReportService>();
+builder.Services.AddScoped<ITransactionService, TransactionService>();
 
 // Admin Services
 builder.Services.AddScoped<IAdminMenuService, AdminMenuService>();

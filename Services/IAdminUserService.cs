@@ -11,7 +11,7 @@ namespace CafePOS.API.Services
         Task<UserDto> GetUserAsync(int id);
         Task<UserDto> CreateUserAsync(CreateUserRequest request);
         Task<UserDto> UpdateUserAsync(int id, UpdateUserRequest request);
-        Task DeleteUserAsync(int id);
+        Task DeleteUserAsync(int id, int performedById);
         Task ResetPasswordAsync(int id, string newPassword);
     }
 
@@ -124,21 +124,39 @@ namespace CafePOS.API.Services
             };
         }
 
-        public async Task DeleteUserAsync(int id)
+        public async Task DeleteUserAsync(int id, int performedById)
         {
             var user = await _context.Users.FindAsync(id);
             if (user == null)
                 throw new KeyNotFoundException($"User {id} not found");
 
-            // Don't allow deleting the last admin
+            var performingAdmin = await _context.Users.FindAsync(performedById);
+            if (performingAdmin == null || performingAdmin.Role != UserRole.Admin)
+                throw new UnauthorizedAccessException("Only admins can delete users");
+
+            // Prevent deleting self accidentally
+            if (id == performedById)
+                throw new InvalidOperationException("You cannot delete your own account");
+
+            // If target user is Admin
             if (user.Role == UserRole.Admin)
             {
-                var adminCount = await _context.Users.CountAsync(u => u.Role == UserRole.Admin && u.IsActive);
-                if (adminCount <= 1)
+                var activeAdminCount = await _context.Users.CountAsync(u => u.Role == UserRole.Admin && u.IsActive);
+
+                // Prevent deleting the last active admin
+                if (user.IsActive && activeAdminCount <= 1)
                     throw new InvalidOperationException("Cannot delete the last admin user");
+
+                // If the user was already soft-deleted before, hard delete now
+                if (!user.IsActive)
+                {
+                    _context.Users.Remove(user);
+                    await _context.SaveChangesAsync();
+                    return;
+                }
             }
 
-            // Soft delete
+            // Soft delete (first deletion)
             user.IsActive = false;
             user.UpdatedAt = DateTime.UtcNow;
             await _context.SaveChangesAsync();

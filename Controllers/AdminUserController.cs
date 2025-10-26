@@ -86,14 +86,26 @@ namespace CafePOS.API.Controllers
         {
             try
             {
-                await _userService.DeleteUserAsync(id);
+                // Get currently logged-in user's ID from JWT or session
+                var performedById = int.Parse(User.FindFirst("id")?.Value ?? "0");
+
+                await _userService.DeleteUserAsync(id, performedById);
                 return NoContent();
             }
             catch (KeyNotFoundException ex)
             {
                 return NotFound(new { message = ex.Message });
             }
+            catch (UnauthorizedAccessException ex)
+            {
+                return Forbid(ex.Message);
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
         }
+
 
         [HttpPost("users/{id}/reset-password")]
         public async Task<ActionResult> ResetPassword(int id, [FromBody] ResetPasswordRequest request)

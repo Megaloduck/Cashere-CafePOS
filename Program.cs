@@ -12,6 +12,8 @@ using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Explicitly configure Kestrel URLs
+builder.WebHost.UseUrls("http://0.0.0.0:7102", "https://0.0.0.0:7103");
 
 // TEMPORARY - Generate BCrypt hash
 //var testPassword = "admin123";

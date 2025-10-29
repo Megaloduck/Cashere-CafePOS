@@ -82,15 +82,25 @@ namespace CafePOS.API.Controllers
         }
 
         [HttpDelete("users/{id}")]
-        public async Task<ActionResult> DeleteUser(int id)
+        public async Task<ActionResult<DeleteUserResult>> DeleteUser(int id)
         {
             try
             {
-                // Get currently logged-in user's ID from JWT or session
-                var performedById = int.Parse(User.FindFirst("id")?.Value ?? "0");
+                // Get currently logged-in user's ID from JWT - try multiple claim names
+                var userIdClaim = User.FindFirst("id")?.Value
+                               ?? User.FindFirst("userId")?.Value
+                               ?? User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value
+                               ?? "0";
 
-                await _userService.DeleteUserAsync(id, performedById);
-                return NoContent();
+                var performedById = int.Parse(userIdClaim);
+
+                if (performedById == 0)
+                {
+                    return Unauthorized(new { message = "Unable to identify user from token" });
+                }
+
+                var result = await _userService.DeleteUserAsync(id, performedById);
+                return Ok(result);
             }
             catch (KeyNotFoundException ex)
             {
@@ -98,14 +108,13 @@ namespace CafePOS.API.Controllers
             }
             catch (UnauthorizedAccessException ex)
             {
-                return Forbid(ex.Message);
+                return StatusCode(403, new { message = ex.Message });
             }
             catch (InvalidOperationException ex)
             {
                 return BadRequest(new { message = ex.Message });
             }
         }
-
 
         [HttpPost("users/{id}/reset-password")]
         public async Task<ActionResult> ResetPassword(int id, [FromBody] ResetPasswordRequest request)

@@ -11,7 +11,7 @@ namespace CafePOS.API.Services
         Task<UserDto> GetUserAsync(int id);
         Task<UserDto> CreateUserAsync(CreateUserRequest request);
         Task<UserDto> UpdateUserAsync(int id, UpdateUserRequest request);
-        Task DeleteUserAsync(int id, int performedById);
+        Task<DeleteUserResult> DeleteUserAsync(int id, int performedById);
         Task ResetPasswordAsync(int id, string newPassword);
     }
 
@@ -124,7 +124,7 @@ namespace CafePOS.API.Services
             };
         }
 
-        public async Task DeleteUserAsync(int id, int performedById)
+        public async Task<DeleteUserResult> DeleteUserAsync(int id, int performedById)
         {
             var user = await _context.Users.FindAsync(id);
             if (user == null)
@@ -134,9 +134,11 @@ namespace CafePOS.API.Services
             if (performingAdmin == null || performingAdmin.Role != UserRole.Admin)
                 throw new UnauthorizedAccessException("Only admins can delete users");
 
-            // Prevent deleting self accidentally
+            // Prevent deleting self
             if (id == performedById)
                 throw new InvalidOperationException("You cannot delete your own account");
+
+            var result = new DeleteUserResult { Success = true };
 
             // If target user is Admin
             if (user.Role == UserRole.Admin)
@@ -147,19 +149,46 @@ namespace CafePOS.API.Services
                 if (user.IsActive && activeAdminCount <= 1)
                     throw new InvalidOperationException("Cannot delete the last admin user");
 
-                // If the user was already soft-deleted before, hard delete now
+                // If the admin is already inactive (soft-deleted), perform hard delete
                 if (!user.IsActive)
                 {
                     _context.Users.Remove(user);
                     await _context.SaveChangesAsync();
-                    return;
+                    result.IsHardDelete = true;
+                    result.Message = $"Admin user '{user.Username}' has been permanently deleted";
+                    return result;
+                }
+                else
+                {
+                    // First deletion: soft delete (mark as inactive)
+                    user.IsActive = false;
+                    user.UpdatedAt = DateTime.UtcNow;
+                    await _context.SaveChangesAsync();
+                    result.IsSoftDelete = true;
+                    result.Message = $"Admin user '{user.Username}' has been deactivated. Delete again to permanently remove";
+                    return result;
                 }
             }
 
-            // Soft delete (first deletion)
-            user.IsActive = false;
-            user.UpdatedAt = DateTime.UtcNow;
-            await _context.SaveChangesAsync();
+            // For non-admin users: soft delete on first attempt
+            if (user.IsActive)
+            {
+                user.IsActive = false;
+                user.UpdatedAt = DateTime.UtcNow;
+                await _context.SaveChangesAsync();
+                result.IsSoftDelete = true;
+                result.Message = $"User '{user.Username}' has been deactivated. Delete again to permanently remove";
+            }
+            else
+            {
+                // If already inactive, hard delete
+                _context.Users.Remove(user);
+                await _context.SaveChangesAsync();
+                result.IsHardDelete = true;
+                result.Message = $"User '{user.Username}' has been permanently deleted";
+            }
+
+            return result;
         }
 
         public async Task ResetPasswordAsync(int id, string newPassword)
